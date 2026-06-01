@@ -1,0 +1,170 @@
+# Trae / Qoder 平台适配器配置
+# Trae / Qoder Platform Adapter Configuration
+# 版本: v1.0
+# 注意：Trae 和 Qoder 共享相同的 Skills 格式
+
+platform: trae-qoder
+version: ">=2025.07"
+
+# ============================================================================
+# 工具映射 (Tool Mapping)
+# ============================================================================
+
+tool_mapping:
+  file_read: "文件读取"
+  file_write: "文件写入"
+  file_append: "文件追加"
+  file_list: "目录浏览"
+  file_exists: "文件存在检查"
+  
+  command_execute: "终端执行"
+  command_check_status: "进程状态检查"
+  
+  web_search: "网络搜索"
+  web_fetch: "网页获取"
+  
+  user_interact: "对话交互"
+  code_search: "代码搜索"
+
+# ============================================================================
+# 路径映射 (Path Mapping)
+# ============================================================================
+
+path_mapping:
+  PROJECT_ROOT: "{project_root}"
+  SESSION_ID: "N/A"
+  WORKSPACE_DIR: "{project_root}/test-output"
+  TEMP_DIR: "{project_root}/.temp"
+
+# ============================================================================
+# 能力声明 (Capability Declaration)
+# ============================================================================
+
+capabilities:
+  python_available: true
+  python_version: "取决于用户环境"
+  
+  excel_generation: "conditional"
+  chart_embedding: "conditional"
+  
+  skill_nesting: false
+  todo_tracking: false
+  
+  web_search: true
+  web_fetch: true
+  
+  file_system: "full"
+  command_execution: "full"
+
+# ============================================================================
+# 依赖安装 (Dependencies)
+# ============================================================================
+
+dependencies:
+  python_packages:
+    - name: openpyxl
+      version: ">=3.1.0"
+      install_cmd: "pip install openpyxl"
+    - name: matplotlib
+      version: ">=3.8.0"
+      install_cmd: "pip install matplotlib"
+    - name: pandas
+      version: ">=2.0.0"
+      install_cmd: "pip install pandas"
+
+# ============================================================================
+# Skill 元数据格式 (Skill Metadata Format)
+# Trae/Qoder 使用简化的 Markdown header
+# ============================================================================
+
+metadata:
+  format: "markdown_header"
+  
+  header_template: |
+    # 软件测试 Skill 套件
+    
+    > 软件测试全生命周期 Skill 套件
+    > 支持测试用例生成和测试报告生成
+    
+    ## 触发方式
+    - 在对话中输入："生成测试用例" 或 "生成测试报告"
+    - 或在 Skills 面板中选择此 Skill
+    
+    ## 使用说明
+    1. 上传 PRD 或需求文档
+    2. 按提示回答反问题
+    3. 获取生成的测试用例或报告
+
+# ============================================================================
+# 特殊处理 (Special Handling)
+# ============================================================================
+
+special_handling:
+  # Trae/Qoder 通过对话交互
+  user_interact:
+    native_support: true
+    mode: "conversation"
+    supports_multi_select: false  # 需要确认
+    
+  skill_nesting:
+    native_support: false
+    fallback: "内联引用"
+    
+  todo_tracking:
+    native_support: false
+    fallback: "文字列表跟踪"
+    
+  paths:
+    require_absolute: false
+    supports_relative: true
+
+# ============================================================================
+# 安装方式 (Installation)
+# ============================================================================
+
+installation:
+  methods:
+    - type: "marketplace"
+      name: "Trae Skills Market / Qoder Skills Market"
+      steps:
+        - "打开 Skills 市场"
+        - "搜索 '软件测试'"
+        - "点击安装"
+    - type: "manual"
+      steps:
+        - "下载 skill.md 文件"
+        - "在 Trae/Qoder 中导入"
+        - "或通过文件目录放置"
+
+# ============================================================================
+# 降级策略覆盖 (Fallback Overrides)
+# ============================================================================
+
+fallback_overrides:
+  user_interact: "通过对话自然语言交互"
+  skill_nesting: "内联引用"
+  todo_tracking: "文字列表"
+
+# ============================================================================
+# 输出配置 (Output Configuration)
+# ============================================================================
+
+output:
+  default_format: "xlsx"
+  fallback_format: "csv+markdown"
+  
+  directories:
+    final_output: "{PROJECT_ROOT}/test-output/"
+    temp_files: "{PROJECT_ROOT}/.temp/"
+
+# ============================================================================
+# 平台检测规则 (Platform Detection)
+# ============================================================================
+
+detection_rules:
+  - type: "ui_element"
+    element: "Skills 面板"
+  - type: "env_var"
+    var: "TRAE_VERSION"
+  - type: "env_var"
+    var: "QODER_VERSION"

@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://software-test-skill/templates/chart-specs.json",
+  "title": "ChartSpecifications",
+  "description": "测试报告中需要的所有图表规格定义",
+  "version": "1.0",
+
+  "charts": {
+    "pass_rate_pie": {
+      "title": "整体执行结果分布",
+      "type": "pie",
+      "sheet": "Dashboard",
+      "data_source": "执行概览统计",
+      "slices": [
+        { "label": "通过", "color": "#22C55E" },
+        { "label": "失败", "color": "#EF4444" },
+        { "label": "阻塞", "color": "#F97316" },
+        { "label": "未执行", "color": "#94A3B8" }
+      ],
+      "legend_position": "right",
+      "show_percentage": true,
+      "start_angle": 90
+    },
+
+    "module_pass_rate_bar": {
+      "title": "各模块执行状态（通过/失败/阻塞）",
+      "type": "bar_stacked",
+      "sheet": "执行概览",
+      "x_axis": "功能模块",
+      "stacks": [
+        { "label": "通过", "color": "#22C55E" },
+        { "label": "失败", "color": "#EF4444" },
+        { "label": "阻塞", "color": "#F97316" }
+      ],
+      "y_axis_label": "用例数量",
+      "show_values": true,
+      "sort": "descending_by_pass_count"
+    },
+
+    "type_coverage_radar": {
+      "title": "测试类型覆盖度（按模块）",
+      "type": "radar",
+      "sheet": "通过率分析",
+      "axes": ["功能测试", "接口测试", "性能测试", "安全测试", "兼容性测试", "用户视角测试", "回归测试"],
+      "metrics_per_axis": "覆盖率百分比",
+      "fill_alpha": 0.25,
+      "colors": ["#3B82F6", "#22C55E", "#F97316"]
+    },
+
+    "execution_trend_line": {
+      "title": "每日执行进度趋势",
+      "type": "line",
+      "sheet": "执行趋势",
+      "x_axis": "日期",
+      "lines": [
+        { "label": "计划累积", "color": "#94A3B8", "linestyle": "dashed" },
+        { "label": "实际累积执行", "color": "#3B82F6", "linestyle": "solid" },
+        { "label": "累积通过", "color": "#22C55E", "linestyle": "solid" }
+      ],
+      "y_axis_label": "累积用例数",
+      "marker": "o"
+    },
+
+    "priority_stacked_bar": {
+      "title": "各优先级执行状态分布",
+      "type": "bar_stacked",
+      "sheet": "执行概览",
+      "x_axis": "优先级",
+      "categories": ["P0", "P1", "P2", "P3"],
+      "stacks": [
+        { "label": "通过", "color": "#22C55E" },
+        { "label": "失败", "color": "#EF4444" },
+        { "label": "其他", "color": "#94A3B8" }
+      ]
+    },
+
+    "defect_severity_pie": {
+      "title": "缺陷严重程度分布",
+      "type": "pie",
+      "sheet": "缺陷分析",
+      "slices": [
+        { "label": "致命", "color": "#991B1B" },
+        { "label": "严重", "color": "#EF4444" },
+        { "label": "一般", "color": "#F97316" },
+        { "label": "轻微", "color": "#F59E0B" },
+        { "label": "建议", "color": "#94A3B8" }
+      ],
+      "explode": ["致命"]
+    },
+
+    "defect_module_bar": {
+      "title": "缺陷按模块分布",
+      "type": "bar",
+      "sheet": "缺陷分析",
+      "x_axis": "模块名称",
+      "y_axis": "缺陷数量",
+      "color": "#EF4444",
+      "sort": "descending",
+      "show_values": true
+    },
+
+    "defect_trend_line": {
+      "title": "缺陷趋势（新增 vs 关闭 vs 累积未关闭）",
+      "type": "line",
+      "sheet": "缺陷分析",
+      "x_axis": "日期",
+      "lines": [
+        { "label": "累积未关闭", "color": "#EF4444", "linestyle": "solid", "linewidth": 2.5 },
+        { "label": "每日新增", "color": "#F97316", "linestyle": "solid" },
+        { "label": "每日关闭", "color": "#22C55E", "linestyle": "solid" }
+      ],
+      "y_axis_label": "缺陷数量",
+      "marker": "o"
+    },
+
+    "readiness_gauge": {
+      "title": "上线就绪度评分",
+      "type": "progress_bar",
+      "sheet": "风险评估",
+      "min": 0,
+      "max": 100,
+      "value": "calculated",
+      "thresholds": [
+        { "min": 0, "max": 59, "color": "#EF4444", "label": "D-禁止上线" },
+        { "min": 60, "max": 74, "color": "#F97316", "label": "C-不建议上线" },
+        { "min": 75, "max": 89, "color": "#F59E0B", "label": "B-灰度发布" },
+        { "min": 90, "max": 100, "color": "#22C55E", "label": "A-可以上线" }
+      ]
+    },
+
+    "efficiency_bar": {
+      "title": "执行效率对比",
+      "type": "bar",
+      "sheet": "效率分析",
+      "x_axis": "执行人",
+      "y_axis": "日均执行用例数",
+      "color": "#3B82F6",
+      "show_values": true
+    }
+  },
+
+  "fallback_ascii_examples": {
+    "pie_chart": "用 █ 和 ● 模拟饼图占比",
+    "bar_chart": "用 █ 和 ░ 水平柱状图",
+    "line_chart": "用 ●─ 模拟折线",
+    "progress_bar": "用 █████░░░ 表示百分比"
+  },
+
+  "matplotlib_notes": {
+    "dpi": 150,
+    "figure_size": [8, 5],
+    "font_family": "sans-serif",
+    "save_format": "png",
+    "embed_in_excel": true
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://software-test-skill/schemas/test-case-record.schema.json",
+  "title": "TestCaseRecord",
+  "description": "单条测试用例记录的完整结构定义",
+  "type": "object",
+  "required": [
+    "id", "module", "function", "type", "priority",
+    "name", "precondition", "steps", "test_data",
+    "data_prep_method", "expected_result"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "用例编号，格式 TC-{MODULE}-{FUNC}-{SEQ}-{TYPE}",
+      "pattern": "^TC-[A-Z]{2,6}-\\d{2}-\\d{3}-[FIPSCUENR]$",
+      "examples": ["TC-USER-01-001-F", "TC-ORDER-03-012-R"]
+    },
+    "module": {
+      "type": "string",
+      "description": "所属一级模块",
+      "maxLength": 50,
+      "examples": ["用户管理", "交易中心"]
+    },
+    "function": {
+      "type": "string",
+      "description": "所属二级功能点",
+      "maxLength": 50,
+      "examples": ["账号登录", "订单创建"]
+    },
+    "type": {
+      "type": "string",
+      "description": "测试类型",
+      "enum": [
+        "功能测试", "接口测试", "性能测试", "安全测试",
+        "兼容性测试", "用户体验测试", "用户视角测试", "回归测试"
+      ]
+    },
+    "priority": {
+      "type": "string",
+      "description": "优先级",
+      "enum": ["P0", "P1", "P2", "P3"]
+    },
+    "name": {
+      "type": "string",
+      "description": "测试用例名称",
+      "maxLength": 80,
+      "minLength": 5,
+      "examples": ["输入正确账号密码后登录成功并跳转到首页"]
+    },
+    "precondition": {
+      "type": "string",
+      "description": "前置条件（支持多行，以编号列表组织）",
+      "minLength": 1
+    },
+    "steps": {
+      "type": "string",
+      "description": "测试步骤（编号列表，每步独立可执行）",
+      "minLength": 1
+    },
+    "test_data": {
+      "type": "string",
+      "description": "测试数据（键值对列表，含输入数据、预置数据）",
+      "minLength": 1
+    },
+    "data_prep_method": {
+      "type": "string",
+      "description": "数据准备方式",
+      "enum": ["脚本生成", "手工创建", "Mock服务", "脱敏数据", "无需准备"]
+    },
+    "expected_result": {
+      "type": "string",
+      "description": "预期结果（与步骤对应，按维度组织）",
+      "minLength": 1
+    },
+    "actual_result": {
+      "type": "string",
+      "description": "实际结果（执行后填写）"
+    },
+    "target_env": {
+      "type": "string",
+      "description": "适用环境，逗号分隔",
+      "examples": ["沙箱, SIT", "沙箱, SIT, UAT, 生产"]
+    },
+    "env_constraint": {
+      "type": "string",
+      "description": "环境限制条件"
+    },
+    "predecessor_case": {
+      "type": "string",
+      "description": "前置用例编号（逗号分隔）"
+    },
+    "successor_case": {
+      "type": "string",
+      "description": "后置用例编号"
+    },
+    "related_requirement": {
+      "type": "string",
+      "description": "关联需求编号",
+      "examples": ["PRD-USER-001", "STORY-2024-0512"]
+    },
+    "related_test_point": {
+      "type": "string",
+      "description": "关联父级测试点"
+    },
+    "user_perspective_tag": {
+      "type": "string",
+      "description": "用户视角标签",
+      "enum": ["新手探索", "非预期路径", "直觉偏差"]
+    },
+    "user_persona": {
+      "type": "string",
+      "description": "关联用户画像",
+      "enum": ["纯新手", "迁移用户", "非技术用户", "移动端用户", "高频用户"]
+    },
+    "is_regression": {
+      "type": "boolean",
+      "description": "是否回归用例",
+      "default": false
+    },
+    "regression_trigger": {
+      "type": "string",
+      "description": "回归触发变更点"
+    },
+    "proximity_level": {
+      "type": "string",
+      "description": "相近度等级",
+      "enum": ["高", "中", "低", "微", "无关"]
+    },
+    "regression_depth": {
+      "type": "string",
+      "description": "回归深度",
+      "enum": ["全量", "重点", "冒烟", "极简"]
+    },
+    "prod_gate": {
+      "type": "boolean",
+      "description": "是否生产回归门禁",
+      "default": false
+    },
+    "exec_status": {
+      "type": "string",
+      "description": "执行状态",
+      "enum": ["通过", "失败", "阻塞", "跳过", "未执行"]
+    },
+    "executor": {
+      "type": "string",
+      "description": "执行人"
+    },
+    "exec_date": {
+      "type": "string",
+      "description": "执行日期",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "bug_id": {
+      "type": "string",
+      "description": "关联缺陷ID",
+      "examples": ["BUG-012"]
+    },
+    "notes": {
+      "type": "string",
+      "description": "备注"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "is_regression": { "const": true } }
+      },
+      "then": {
+        "required": ["proximity_level", "regression_depth"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "type": { "const": "用户视角测试" } }
+      },
+      "then": {
+        "required": ["user_perspective_tag", "user_persona"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,203 @@
+# Claude Code 平台适配器配置
+# Claude Code Platform Adapter Configuration
+# 版本: v1.0
+
+platform: claude-code
+version: ">=2.0"
+
+# ============================================================================
+# 工具映射 (Tool Mapping)
+# ============================================================================
+
+tool_mapping:
+  file_read: "Read"
+  file_write: "Write"
+  file_append: "Write (append mode)"
+  file_list: "LS / Glob"
+  file_exists: "LS + 判断"
+  
+  command_execute: "Bash"
+  command_check_status: "Bash (check with ps)"
+  
+  web_search: "WebSearch"
+  web_fetch: "WebFetch"
+  
+  user_interact: "自然语言提问（无专用工具）"
+  code_search: "Grep"
+
+# ============================================================================
+# 路径映射 (Path Mapping)
+# ============================================================================
+
+path_mapping:
+  PROJECT_ROOT: "{project_root}"
+  SESSION_ID: "N/A"
+  WORKSPACE_DIR: "{project_root}/test-output"
+  TEMP_DIR: "{project_root}/.temp"
+
+# ============================================================================
+# 能力声明 (Capability Declaration)
+# ============================================================================
+
+capabilities:
+  python_available: true
+  python_version: "取决于用户环境"
+  
+  excel_generation: "conditional"  # 需要用户安装依赖
+  chart_embedding: "conditional"
+  
+  skill_nesting: false
+  todo_tracking: false
+  
+  web_search: true
+  web_fetch: true
+  
+  file_system: "full"
+  command_execution: "full"
+
+# ============================================================================
+# 依赖安装 (Dependencies)
+# ============================================================================
+
+dependencies:
+  python_packages:
+    - name: openpyxl
+      version: ">=3.1.0"
+      install_cmd: "pip install openpyxl"
+      check_cmd: "python3 -c 'import openpyxl; print(\"OK\")'"
+    - name: matplotlib
+      version: ">=3.8.0"
+      install_cmd: "pip install matplotlib"
+      check_cmd: "python3 -c 'import matplotlib; print(\"OK\")'"
+    - name: pandas
+      version: ">=2.0.0"
+      install_cmd: "pip install pandas"
+      check_cmd: "python3 -c 'import pandas; print(\"OK\")'"
+
+# ============================================================================
+# Skill 元数据格式 (Skill Metadata Format)
+# Claude Code 使用 YAML frontmatter
+# ============================================================================
+
+metadata:
+  format: "yaml_frontmatter"
+  
+  frontmatter_template: |
+    ---
+    name: software-test-suite
+    description: |
+      软件测试全生命周期 Skill 套件。
+      支持测试用例生成（左移、变更影响分析、相近度报表、用户视角）
+      和测试报告生成（数据分析、图表、风险评估）。
+    
+    # 是否允许模型自动调用此 Skill
+    # false = 必须通过 Command 手动触发
+    disable-model-invocation: false
+    
+    # 可选：指定触发关键词
+    triggers:
+      - "生成测试用例"
+      - "生成测试报告"
+      - "测试分析"
+    
+    # 可选：依赖的其他 Skill
+    # references:
+    #   - path: ./references/proximity-model.md
+    ---
+
+# ============================================================================
+# 特殊处理 (Special Handling)
+# ============================================================================
+
+special_handling:
+  # Claude Code 无专用用户交互工具
+  user_interact:
+    native_support: false
+    fallback: "自然语言提问，等待用户文本回复"
+    format: |
+      请回复以下问题（格式：1-A, 2-是, 3-补充内容）：
+      
+      1. [问题]
+         A. 选项1  B. 选项2  C. 其他
+      2. [问题]
+         ...
+    
+  # Claude Code 无 Skill 嵌套
+  skill_nesting:
+    native_support: false
+    fallback: "内联引用"
+    
+  # Claude Code 无 Todo 工具
+  todo_tracking:
+    native_support: false
+    fallback: "文字列表跟踪"
+    format: |
+      ## 任务进度
+      - [✓] 已完成：xxx
+      - [⏳] 进行中：xxx
+      - [ ] 待完成：xxx
+    
+  # Claude Code 使用项目相对路径
+  paths:
+    require_absolute: false
+    supports_relative: true
+    base: "{project_root}"
+
+# ============================================================================
+# 目录结构要求 (Directory Structure)
+# Claude Code Skill 需要特定目录结构
+# ============================================================================
+
+directory_structure:
+  required:
+    - ".claude/skills/software-test-suite/SKILL.md"
+  optional:
+    - ".claude/skills/software-test-suite/references/"
+    - ".claude/skills/software-test-suite/scripts/"
+    - ".claude/CLAUDE.md"  # 项目级规则
+
+# ============================================================================
+# 降级策略覆盖 (Fallback Overrides)
+# ============================================================================
+
+fallback_overrides:
+  user_interact: |
+    使用自然语言向用户提问，格式：
+    "请确认以下问题（回复格式：1-A, 2-是）：
+     1. [问题] A. x B. y
+     2. [问题] ..."
+  
+  skill_nesting: |
+    将引用的 Skill 内容直接复制到当前 Prompt 中
+  
+  todo_tracking: |
+    在对话中使用 Markdown 任务列表跟踪进度
+
+# ============================================================================
+# 输出配置 (Output Configuration)
+# ============================================================================
+
+output:
+  default_format: "xlsx"
+  fallback_format: "csv+markdown"
+  
+  directories:
+    final_output: "{PROJECT_ROOT}/test-output/"
+    temp_files: "{PROJECT_ROOT}/.temp/"
+    
+  naming_convention:
+    test_cases: "test_cases_{project_name}_v{version}.xlsx"
+    test_report: "test_report_{project_name}_v{version}_{date}.xlsx"
+    proximity_report: "proximity_analysis_{project_name}.md"
+
+# ============================================================================
+# 平台检测规则 (Platform Detection)
+# ============================================================================
+
+detection_rules:
+  - type: "directory_exists"
+    path: ".claude"
+  - type: "file_exists"
+    path: ".claude/skills"
+  - type: "env_var"
+    var: "CLAUDE_CODE_VERSION"

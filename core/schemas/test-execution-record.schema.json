@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://software-test-skill/schemas/test-execution-record.schema.json",
+  "title": "TestExecutionRecord",
+  "description": "测试执行追踪记录结构定义 — 用于接收用户的执行结果输入",
+  "type": "object",
+  "required": ["case_id", "status"],
+  "properties": {
+    "case_id": {
+      "type": "string",
+      "description": "关联的测试用例编号",
+      "pattern": "^TC-[A-Z]{2,6}-\\d{2}-\\d{3}-[FIPSCUENR]$"
+    },
+    "module": {
+      "type": "string",
+      "description": "所属模块"
+    },
+    "case_name": {
+      "type": "string",
+      "description": "测试用例名称"
+    },
+    "test_type": {
+      "type": "string",
+      "enum": ["功能测试","接口测试","性能测试","安全测试","兼容性测试","用户体验测试","用户视角测试","回归测试"]
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["P0","P1","P2","P3"]
+    },
+    "status": {
+      "type": "string",
+      "description": "执行状态",
+      "enum": ["通过", "失败", "阻塞", "跳过", "未执行"]
+    },
+    "actual_result_detail": {
+      "type": "string",
+      "description": "实际结果详情（失败时必填）"
+    },
+    "executor": {
+      "type": "string",
+      "description": "执行人"
+    },
+    "exec_date": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "exec_env": {
+      "type": "string",
+      "description": "执行环境",
+      "enum": ["沙箱", "SIT", "UAT", "生产"]
+    },
+    "bug_id": {
+      "type": "string",
+      "description": "关联缺陷ID（失败时填写）"
+    },
+    "bug_severity": {
+      "type": "string",
+      "description": "缺陷严重程度",
+      "enum": ["致命", "严重", "一般", "轻微", "建议"]
+    },
+    "bug_status": {
+      "type": "string",
+      "description": "缺陷处理状态",
+      "enum": ["待修复", "修复中", "已修复", "不予修复", "重复"]
+    },
+    "exec_duration_min": {
+      "type": "number",
+      "description": "执行耗时（分钟）",
+      "minimum": 0
+    },
+    "retry_count": {
+      "type": "integer",
+      "description": "重试次数",
+      "default": 0,
+      "minimum": 0
+    },
+    "notes": {
+      "type": "string",
+      "description": "备注"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "status": { "const": "失败" } }
+      },
+      "then": {
+        "required": ["actual_result_detail", "bug_id"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "status": { "const": "阻塞" } }
+      },
+      "then": {
+        "required": ["actual_result_detail"]
+      }
+    }
+  ]
+}

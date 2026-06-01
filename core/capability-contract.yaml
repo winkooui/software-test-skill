@@ -1,0 +1,414 @@
+# 软件测试 Skill 能力契约定义
+# Software Test Skill Capability Contract
+# 版本: v1.0
+# 作用: 定义平台无关的能力接口，各平台适配器按此契约实现
+
+version: "1.0"
+description: "平台无关的能力契约，用于跨平台适配"
+
+# ============================================================================
+# 核心能力定义 (Core Capabilities)
+# ============================================================================
+
+capabilities:
+  # --------------------------------------------------------------------------
+  # 文件系统能力 (File System)
+  # --------------------------------------------------------------------------
+  file_read:
+    description: "读取文件内容"
+    params:
+      - name: path
+        type: string
+        required: true
+        description: "文件绝对路径"
+      - name: offset
+        type: integer
+        required: false
+        default: 1
+        description: "起始行号 (1-based)"
+      - name: limit
+        type: integer
+        required: false
+        description: "读取行数限制"
+    returns:
+      type: string
+      description: "文件内容"
+    errors:
+      - FILE_NOT_FOUND
+      - PERMISSION_DENIED
+      - PATH_IS_DIRECTORY
+
+  file_write:
+    description: "创建或覆盖写入文件"
+    params:
+      - name: path
+        type: string
+        required: true
+        description: "文件绝对路径"
+      - name: content
+        type: string
+        required: true
+        description: "文件内容"
+    returns:
+      type: boolean
+      description: "是否成功"
+    errors:
+      - PERMISSION_DENIED
+      - DIRECTORY_NOT_EXISTS
+      - DISK_FULL
+
+  file_append:
+    description: "追加内容到文件"
+    params:
+      - name: path
+        type: string
+        required: true
+      - name: content
+        type: string
+        required: true
+    returns:
+      type: boolean
+
+  file_list:
+    description: "列出目录内容"
+    params:
+      - name: path
+        type: string
+        required: true
+        description: "目录绝对路径"
+      - name: pattern
+        type: string
+        required: false
+        description: "Glob 匹配模式，如 '*.md'"
+    returns:
+      type: array
+      items:
+        type: object
+        properties:
+          name: { type: string }
+          type: { enum: [file, directory] }
+          size: { type: integer }
+          modified: { type: string, format: date-time }
+
+  file_exists:
+    description: "检查文件或目录是否存在"
+    params:
+      - name: path
+        type: string
+        required: true
+    returns:
+      type: boolean
+
+  # --------------------------------------------------------------------------
+  # 命令执行能力 (Command Execution)
+  # --------------------------------------------------------------------------
+  command_execute:
+    description: "执行终端命令"
+    params:
+      - name: command
+        type: string
+        required: true
+        description: "要执行的命令"
+      - name: working_directory
+        type: string
+        required: false
+        description: "工作目录"
+      - name: timeout
+        type: integer
+        required: false
+        default: 120000
+        description: "超时时间（毫秒）"
+      - name: blocking
+        type: boolean
+        required: false
+        default: true
+        description: "是否阻塞等待"
+    returns:
+      type: object
+      properties:
+        exit_code: { type: integer }
+        stdout: { type: string }
+        stderr: { type: string }
+        command_id: { type: string }
+    errors:
+      - COMMAND_NOT_FOUND
+      - TIMEOUT
+      - PERMISSION_DENIED
+
+  command_check_status:
+    description: "检查非阻塞命令状态"
+    params:
+      - name: command_id
+        type: string
+        required: true
+    returns:
+      type: object
+      properties:
+        status: { enum: [running, completed, error] }
+        exit_code: { type: integer }
+        stdout: { type: string }
+
+  # --------------------------------------------------------------------------
+  # 网络搜索能力 (Web Search)
+  # --------------------------------------------------------------------------
+  web_search:
+    description: "搜索互联网"
+    params:
+      - name: query
+        type: string
+        required: true
+      - name: num_results
+        type: integer
+        required: false
+        default: 5
+      - name: language
+        type: string
+        required: false
+        description: "语言限制，如 'zh' 或 'en'"
+    returns:
+      type: array
+      items:
+        type: object
+        properties:
+          title: { type: string }
+          url: { type: string }
+          snippet: { type: string }
+
+  web_fetch:
+    description: "获取网页内容"
+    params:
+      - name: url
+        type: string
+        required: true
+        format: uri
+    returns:
+      type: string
+      description: "网页 Markdown 内容"
+
+  # --------------------------------------------------------------------------
+  # 用户交互能力 (User Interaction)
+  # --------------------------------------------------------------------------
+  user_interact:
+    description: "向用户提问获取反馈"
+    params:
+      - name: questions
+        type: array
+        required: true
+        items:
+          type: object
+          properties:
+            header:
+              type: string
+              maxLength: 12
+              description: "简短标签"
+            question:
+              type: string
+              required: true
+            multiSelect:
+              type: boolean
+              default: false
+            options:
+              type: array
+              items:
+                type: object
+                properties:
+                  label: { type: string }
+                  description: { type: string }
+    returns:
+      type: object
+      description: "用户回答，key 为 question 的标识"
+    notes: "如果平台无专用工具，降级为文本输出让用户回复"
+
+  # --------------------------------------------------------------------------
+  # 代码搜索能力 (Code Search) - 可选
+  # --------------------------------------------------------------------------
+  code_search:
+    description: "在代码库中搜索"
+    params:
+      - name: pattern
+        type: string
+        required: true
+        description: "搜索模式（正则或关键词）"
+      - name: path
+        type: string
+        required: false
+        description: "搜索路径"
+      - name: glob
+        type: string
+        required: false
+        description: "文件匹配模式"
+    returns:
+      type: array
+      items:
+        type: object
+        properties:
+          file: { type: string }
+          line: { type: integer }
+          content: { type: string }
+
+  # --------------------------------------------------------------------------
+  # 环境信息能力 (Environment Info)
+  # --------------------------------------------------------------------------
+  env_info:
+    description: "获取环境信息"
+    returns:
+      type: object
+      properties:
+        platform: { type: string, enum: [solo, claude-code, trae, qoder, codex, unknown] }
+        working_directory: { type: string }
+        python_available: { type: boolean }
+        python_version: { type: string }
+        node_available: { type: boolean }
+        shell: { type: string }
+
+# ============================================================================
+# 扩展能力声明 (Extended Capabilities)
+# 这些能力不是所有平台都具备，需要运行时检测
+# ============================================================================
+
+extended_capabilities:
+  excel_generation:
+    description: "生成 Excel 文件（含图表）"
+    requirements:
+      - python_available: true
+      - packages: [openpyxl, matplotlib, pandas]
+    fallback: "降级为 CSV + Markdown 表格"
+
+  chart_embedding:
+    description: "在 Excel 中嵌入图表"
+    requirements:
+      - excel_generation: true
+      - packages: [matplotlib]
+    fallback: "生成独立图片文件 + Markdown 引用"
+
+  skill_nesting:
+    description: "调用其他 Skill"
+    notes: "仅 SOLO 支持，其他平台需内联"
+    fallback: "将子 Skill 内容内联到主 Prompt"
+
+  todo_tracking:
+    description: "使用 Todo 列表跟踪进度"
+    notes: "仅 SOLO 有专用工具"
+    fallback: "在对话中用文字列表跟踪"
+
+# ============================================================================
+# 降级策略 (Fallback Strategies)
+# ============================================================================
+
+fallback_rules:
+  excel_generation:
+    condition: "python 不可用 或 openpyxl 未安装"
+    action: |
+      1. 输出 Markdown 格式的表格
+      2. 同时输出 CSV 格式内容
+      3. 提示用户："当前环境无法生成 Excel，已输出 CSV 格式，
+         您可复制到 Excel 中，或运行 'pip install openpyxl matplotlib' 后重试"
+
+  chart_embedding:
+    condition: "matplotlib not installed"
+    action: |
+      1. 使用 ASCII art 或 Unicode 字符绘制简单图表
+      2. 或输出数据表格 + 文字描述趋势
+      3. 提示用户："图表已降级为文本形式，安装 matplotlib 后可生成可视化图表"
+
+  user_interact:
+    condition: "user_interact tool unavailable"
+    action: |
+      1. 将所有问题以带编号的文本形式一次性输出
+      2. 格式示例：
+         "请逐一回复以下问题（格式：1-A, 2-是, 3-补充内容）：
+          1. [问题1] ...
+             A. 选项1  B. 选项2  C. 其他
+          2. [问题2] ..."
+      3. 等待用户一次性回复所有问题
+
+  skill_nesting:
+    condition: "always for non-solo platforms"
+    action: "将引用的 Skill 内容直接内联到当前 Prompt 中"
+
+  todo_tracking:
+    condition: "todo tool unavailable"
+    action: |
+      1. 在对话开始时声明当前任务列表
+      2. 每完成一项用文字更新状态
+      3. 格式："[✓] 已完成任务  [⏳] 进行中任务  [ ] 待完成任务"
+
+# ============================================================================
+# 路径规范 (Path Conventions)
+# ============================================================================
+
+path_conventions:
+  # 各平台的路径变量，适配器负责替换
+  variables:
+    PROJECT_ROOT: "项目根目录"
+    SESSION_ID: "会话ID（仅 SOLO）"
+    WORKSPACE_DIR: "最终产物输出目录"
+    TEMP_DIR: "临时文件目录"
+
+  # 推荐目录结构
+  recommended_structure:
+    output: "{WORKSPACE_DIR}/test-output/"
+    temp: "{TEMP_DIR}/.test-skill-temp/"
+    logs: "{WORKSPACE_DIR}/test-logs/"
+
+# ============================================================================
+# 工具名称映射 (Tool Name Mapping)
+# 各平台适配器参考此表进行名称转换
+# ============================================================================
+
+tool_name_mapping:
+  solo:
+    file_read: "Read"
+    file_write: "Write"
+    file_list: "LS / Glob"
+    command_execute: "RunCommand"
+    web_search: "WebSearch"
+    web_fetch: "WebFetch"
+    user_interact: "AskUserQuestion"
+    code_search: "Grep / SearchCodebase"
+
+  claude-code:
+    file_read: "Read"
+    file_write: "Write"
+    file_list: "LS / Glob"
+    command_execute: "Bash"
+    web_search: "WebSearch"
+    web_fetch: "WebFetch"
+    user_interact: "自然语言提问（无专用工具）"
+    code_search: "Grep"
+
+  trae-qoder:
+    file_read: "文件读取"
+    file_write: "文件写入"
+    file_list: "目录浏览"
+    command_execute: "终端执行"
+    web_search: "网络搜索"
+    web_fetch: "网页获取"
+    user_interact: "对话交互"
+    code_search: "代码搜索"
+
+  codex:
+    file_read: "文件读取"
+    file_write: "文件写入"
+    file_list: "目录浏览"
+    command_execute: "终端"
+    web_search: "搜索"
+    web_fetch: "网页获取"
+    user_interact: "对话"
+    code_search: "代码搜索"
+
+# ============================================================================
+# 验证检查清单 (Validation Checklist)
+# ============================================================================
+
+validation_checklist:
+  pre_execution:
+    - "检测当前平台类型"
+    - "检查 Python 环境及所需包"
+    - "确定输出目录可写"
+    - "确定降级策略"
+
+  post_execution:
+    - "验证输出文件生成"
+    - "检查文件完整性"
+    - "报告执行摘要"

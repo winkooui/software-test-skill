@@ -1,0 +1,693 @@
+# 测试用例组成字段规范
+# Test Case Field Specification
+# 版本: v1.0
+# 作用: 定义测试用例的完整字段体系，作为 Skill 生成用例时的强制参考
+
+version: "1.0"
+description: "测试用例字段完整定义，包含分组、类型、必填性、格式约束和示例"
+
+# ============================================================================
+# 字段分组
+# ============================================================================
+
+groups:
+  core:
+    label: "核心字段"
+    description: "每条测试用例必须包含的基本字段"
+    order: 1
+  extended:
+    label: "扩展字段"
+    description: "根据测试场景选择性补充的字段"
+    order: 2
+  user_perspective:
+    label: "用户视角字段"
+    description: "用户视角测试专用字段"
+    order: 3
+  regression:
+    label: "回归测试字段"
+    description: "回归测试和相近度分析专用字段"
+    order: 4
+  execution:
+    label: "执行追踪字段"
+    description: "测试执行阶段填写，记录执行结果"
+    order: 5
+  meta:
+    label: "元数据字段"
+    description: "管理和追溯用途的辅助字段"
+    order: 6
+
+# ============================================================================
+# 字段详细定义
+# ============================================================================
+
+fields:
+
+  # ==========================================================================
+  # 核心字段 (Core)
+  # ==========================================================================
+
+  - id: TC_ID
+    name: "用例编号"
+    group: core
+    type: string
+    required: true
+    description: "测试用例的唯一标识符，全局不可重复"
+    format:
+      pattern: "TC-{MODULE}-{FUNC}-{SEQ}-{TYPE}"
+      rules:
+        - "TC: 固定前缀，表示 Test Case"
+        - "MODULE: 模块缩写，2-6个大写字母，如 USER / ORDER / PAY"
+        - "FUNC: 功能编号，2位数字，如 01 / 02 / 15"
+        - "SEQ: 序号，3位数字，同一功能下从001递增"
+        - "TYPE: 测试类型标识，1个大写字母"
+      type_codes:
+        F: "功能测试 (Functional)"
+        I: "接口测试 (Interface/API)"
+        P: "性能测试 (Performance)"
+        S: "安全测试 (Security)"
+        C: "兼容性测试 (Compatibility)"
+        U: "用户体验测试 (User Experience)"
+        E: "异常/边界测试 (Exception/Edge)"
+        N: "用户视角测试 (Novice/User Perspective)"
+        R: "回归测试 (Regression)"
+    examples:
+      - "TC-USER-01-001-F   → 用户模块-登录功能-第1条-功能测试"
+      - "TC-ORDER-03-012-P  → 订单模块-支付功能-第12条-性能测试"
+      - "TC-USER-01-005-N   → 用户模块-登录功能-第5条-用户视角测试"
+    validation:
+      - "编号全局唯一，不能重复"
+      - "同一功能下 SEQ 必须连续"
+      - "TYPE 必须是预定义的 9 种类型之一"
+
+  - id: TC_MODULE
+    name: "所属模块"
+    group: core
+    type: string
+    required: true
+    description: "测试用例所属的一级功能模块"
+    examples:
+      - "用户管理"
+      - "交易中心"
+      - "通知服务"
+      - "数据报表"
+    validation:
+      - "必须能在功能树中定位到对应的一级节点"
+      - "命名与 PRD 中定义的一致"
+
+  - id: TC_FUNCTION
+    name: "所属功能"
+    group: core
+    type: string
+    required: true
+    description: "测试用例所属的二级功能点"
+    examples:
+      - "用户注册"
+      - "账号登录"
+      - "密码重置"
+      - "订单创建"
+    validation:
+      - "必须能在功能树的二级节点中找到对应项"
+
+  - id: TC_TYPE
+    name: "测试类型"
+    group: core
+    type: enum
+    required: true
+    description: "测试用例的分类，决定用例的测试策略和方法"
+    options:
+      - value: "功能测试"
+        description: "验证功能的正确性，覆盖正向流程和业务逻辑"
+      - value: "接口测试"
+        description: "验证 API 接口的请求/响应、参数校验、异常状态码"
+      - value: "性能测试"
+        description: "验证系统的响应时间、并发处理能力、资源占用"
+      - value: "安全测试"
+        description: "验证权限控制、数据保护、注入防护、越权访问"
+      - value: "兼容性测试"
+        description: "验证多平台/多浏览器/多设备下的表现一致性"
+      - value: "用户体验测试"
+        description: "验证交互流畅度、提示友好性、操作便捷性"
+      - value: "用户视角测试"
+        description: "以真实用户思维验证新手探索、非预期路径、直觉偏差"
+      - value: "回归测试"
+        description: "验证已有功能在变更后是否正常"
+    validation:
+      - "与用例编号中的 TYPE 标识保持一致"
+
+  - id: TC_PRIORITY
+    name: "优先级"
+    group: core
+    type: enum
+    required: true
+    description: "测试用例的重要性和执行优先程度"
+    options:
+      - value: "P0"
+        description: "核心业务流程，阻塞性问题，必须 100% 通过才能上线"
+        criteria:
+          - "用户最常使用的高频路径"
+          - "涉及资金、数据安全的核心功能"
+          - "阻塞性缺陷涉及的修复验证"
+          - "系统崩溃/不可用的场景"
+      - value: "P1"
+        description: "重要功能，影响较大但非阻塞，上线前应尽量全部通过"
+        criteria:
+          - "重要的业务分支逻辑"
+          - "高频使用的辅助功能"
+          - "核心接口的参数校验"
+      - value: "P2"
+        description: "一般功能，非核心路径，建议通过但可适当延后"
+        criteria:
+          - "低频使用的功能"
+          - "非核心的 UI 展示"
+          - "辅助配置和管理功能"
+      - value: "P3"
+        description: "边缘场景和优化建议，可在上线后持续完善"
+        criteria:
+          - "极端边界值测试"
+          - "罕见异常路径"
+          - "UI 微调建议"
+
+  - id: TC_NAME
+    name: "测试用例名称"
+    group: core
+    type: string
+    required: true
+    description: "简明扼要描述测试用例的验证目标，一句话说清楚测什么"
+    format:
+      max_length: 80
+      style: "动词开头 + 被测对象 + 场景/条件 + 期望结果"
+    examples:
+      - "输入正确账号密码后登录成功并跳转到首页"
+      - "输入错误密码连续5次后账号被锁定30分钟"
+      - "未登录状态下访问下单页面自动跳转到登录页"
+    anti_patterns:
+      - "❌ '登录测试'          → 太笼统"
+      - "❌ '测试一下登录功能'  → 口语化，不专业"
+      - "❌ 'TEST-LOGIN-01'    → 编号不应出现在名称中"
+
+  - id: TC_PRECONDITION
+    name: "前置条件"
+    group: core
+    type: string
+    required: true
+    description: "执行该用例前必须满足的环境、数据、状态条件"
+    format:
+      style: "编号列表，每条前置条件占一行"
+    examples: |
+      1. 测试环境已部署 v2.1.0 版本
+      2. 系统中存在一个状态为"正常"的注册用户（用户名: test01, 密码: Test@123）
+      3. 该用户已完成实名认证
+      4. 该用户账户余额 ≥ 100 元
+    tips:
+      - "前置条件应具体、可验证，不应有模糊描述"
+      - "涉及的数据应在「测试数据」字段中详细列出"
+
+  - id: TC_STEPS
+    name: "测试步骤"
+    group: core
+    type: string
+    required: true
+    description: "按顺序描述执行测试的操作步骤，每一步都可执行、可复现"
+    format:
+      style: "编号列表，每步一个操作，动词开头"
+      granularity: "每步应是一个独立的用户操作或系统交互"
+    examples: |
+      1. 打开登录页面（URL: https://xxx.com/login）
+      2. 在用户名输入框中输入 "test01"
+      3. 在密码输入框中输入 "Test@123"
+      4. 点击「登录」按钮
+      5. 观察页面跳转和显示内容
+    rules:
+      - "步骤编号从 1 开始递增"
+      - "每步必须可独立执行"
+      - "涉及具体输入值时必须在步骤中写明"
+      - "验证点的检查动作也应作为独立步骤"
+
+  - id: TC_TEST_DATA
+    name: "测试数据"
+    group: core
+    type: string
+    required: true
+    description: "执行该用例所需的具体输入数据和系统数据"
+    format:
+      style: "键值对列表"
+    examples: |
+      输入数据：
+        - 用户名: test01
+        - 密码: Test@123
+        - 验证码: 123456（Mock固定值）
+      
+      预置数据：
+        - 用户状态: 正常
+        - 用户余额: 500.00 元
+        - 用户等级: VIP2
+      
+      边界数据（如适用）：
+        - 订单金额: ¥9,999.99（最大值）
+        - 收货地址: 256字符超长地址
+    tips:
+      - "测试数据应具体可执行，避免 '有效用户名' 等模糊描述"
+      - "敏感数据使用测试专用值，不得使用真实生产数据"
+
+  - id: TC_DATA_PREP
+    name: "数据准备方式"
+    group: core
+    type: enum
+    required: true
+    description: "测试数据的准备途径"
+    options:
+      - value: "脚本生成"
+        description: "通过自动化脚本批量创建"
+      - value: "手工创建"
+        description: "通过 UI 或后台手动创建"
+      - value: "Mock服务"
+        description: "通过 Mock 服务模拟外部接口返回"
+      - value: "脱敏数据"
+        description: "使用从生产环境脱敏后的真实数据"
+      - value: "无需准备"
+        description: "测试不依赖预置数据"
+
+  - id: TC_EXPECTED
+    name: "预期结果"
+    group: core
+    type: string
+    required: true
+    description: "执行测试步骤后，系统应该表现出的正确行为和输出"
+    format:
+      style: "编号列表，与测试步骤一一对应，或按检查维度分组"
+    dimension_example: |
+      【页面表现】
+      1. 页面跳转到首页，URL 变为 https://xxx.com/home
+      2. 页面右上角显示用户昵称 "test01"
+      
+      【数据变更】
+      3. 数据库中 t_login_log 表新增一条登录记录，login_status=SUCCESS
+      4. 用户最后登录时间更新为当前时间
+      
+      【接口响应】
+      5. /api/login 接口返回 HTTP 200，响应体包含有效 token
+      
+      【不存在的行为】
+      6. 不会弹出错误提示
+      7. 不会遗留敏感信息在 URL 参数中
+    rules:
+      - "预期结果必须可验证，不能含糊"
+      - "如需检查数据库/接口/日志，明确指出检查的表/接口/路径"
+      - "对于负面用例，明确写出预期的错误码和提示文案"
+
+  - id: TC_ACTUAL
+    name: "实际结果"
+    group: core
+    type: string
+    required: true
+    description: "测试执行后的实际表现，执行前留空，执行后填写"
+    format:
+      style: "与预期结果对应，标注是否一致"
+    examples: |
+      【与预期一致】
+      1. 页面正常跳转到首页 ✓
+      2. 用户昵称正确显示 ✓
+      
+      【与预期不一致】
+      3. ❌ 数据库登录记录 login_status 为 PENDING，预期为 SUCCESS
+         → 关联缺陷: BUG-012
+      
+      【未验证】
+      5. 未检查接口响应（环境限制）
+    rules:
+      - "每条预期结果都要有对应的实际结果记录"
+      - "不一致的地方标注 ❌ 并关联缺陷 ID"
+      - "因环境限制无法验证的标注说明"
+
+  # ==========================================================================
+  # 扩展字段 (Extended)
+  # ==========================================================================
+
+  - id: TC_ENV
+    name: "适用环境"
+    group: extended
+    type: string
+    required: false
+    description: "该用例应在哪些测试环境中执行"
+    format:
+      style: "逗号分隔的环境列表"
+    options:
+      - "沙箱"
+      - "SIT"
+      - "UAT"
+      - "生产"
+    examples:
+      - "沙箱, SIT"
+      - "沙箱, SIT, UAT"
+      - "沙箱, SIT, UAT, 生产"
+    validation:
+      - "至少选择一个环境"
+      - "生产环境仅限 P0 冒烟用例"
+
+  - id: TC_ENV_CONSTRAINT
+    name: "环境限制"
+    group: extended
+    type: string
+    required: false
+    description: "该用例在特定环境下的执行约束条件"
+    examples:
+      - "UAT 环境需使用脱敏生产数据"
+      - "生产环境仅执行只读验证，不写入数据"
+      - "沙箱环境数据每日重置"
+
+  - id: TC_PREDECESSOR
+    name: "前置用例"
+    group: extended
+    type: string
+    required: false
+    description: "执行本用例之前必须先执行完成的用例编号"
+    format:
+      style: "逗号分隔的用例编号列表"
+    examples:
+      - "TC-USER-01-001-F"
+      - "TC-USER-01-001-F, TC-USER-02-003-F"
+    tips:
+      - "前置用例产生的数据是当前用例前置条件的来源"
+
+  - id: TC_SUCCESSOR
+    name: "后置用例"
+    group: extended
+    type: string
+    required: false
+    description: "本用例执行后建议继续执行的用例编号"
+    examples:
+      - "TC-USER-02-001-F"
+
+  - id: TC_REQUIREMENT
+    name: "关联需求"
+    group: extended
+    type: string
+    required: false
+    description: "该用例对应的 PRD 需求编号或 Story ID"
+    examples:
+      - "PRD-USER-001"
+      - "STORY-2024-0512"
+      - "REQ-LOGIN-V2"
+
+  - id: TC_TEST_POINT
+    name: "关联测试点"
+    group: extended
+    type: string
+    required: false
+    description: "该用例对应的父级测试点名称，用于建立用例和测试点的追溯关系"
+    examples:
+      - "用户认证-登录验证"
+      - "用户认证-密码策略"
+      - "订单管理-支付流程-A方支付渠道"
+    tips:
+      - "一个测试点下可有多条用例"
+      - "测试点名称应与功能树中的节点对应"
+
+  # ==========================================================================
+  # 用户视角字段 (User Perspective)
+  # ==========================================================================
+
+  - id: TC_UP_TAG
+    name: "用户视角标签"
+    group: user_perspective
+    type: enum
+    required: false
+    description: "标记该用例属于哪种用户视角测试类型"
+    options:
+      - value: "新手探索"
+        description: "模拟首次接触系统的用户，无培训、凭直觉操作"
+      - value: "非预期路径"
+        description: "用户不走常规流程，尝试快速操作、浏览器后退、多Tab等"
+      - value: "直觉偏差"
+        description: "用户理解与系统设计之间的认知偏差"
+    validation:
+      - "仅测试类型为「用户视角测试」时需要填写"
+
+  - id: TC_PERSONA
+    name: "关联用户画像"
+    group: user_perspective
+    type: enum
+    required: false
+    description: "该用例模拟的目标用户类型"
+    options:
+      - value: "纯新手"
+        description: "首次使用，无培训，不看文档，凭直觉操作"
+      - value: "迁移用户"
+        description: "从旧系统/竞品迁移，带着旧有操作习惯"
+      - value: "非技术用户"
+        description: "对计算机操作不熟练，需要简单直观的引导"
+      - value: "移动端用户"
+        description: "屏幕小，触屏操作，网络环境不稳定"
+      - value: "高频用户"
+        description: "每天使用，追求操作效率，偏好快捷键和批量操作"
+
+  # ==========================================================================
+  # 回归测试字段 (Regression)
+  # ==========================================================================
+
+  - id: TC_IS_REGRESSION
+    name: "是否回归用例"
+    group: regression
+    type: boolean
+    required: false
+    default: false
+    description: "该用例是否属于回归测试范畴"
+
+  - id: TC_REG_TRIGGER
+    name: "回归触发变更点"
+    group: regression
+    type: string
+    required: false
+    description: "触发该回归用例的变更内容描述"
+    examples:
+      - "新增对接A方支付接口"
+      - "修改订单状态机逻辑"
+      - "升级Spring Boot版本至3.x"
+
+  - id: TC_PROXIMITY
+    name: "相近度等级"
+    group: regression
+    type: enum
+    required: false
+    description: "该已有功能与变更点的相近度等级，由相近度分析报表计算得出"
+    options:
+      - value: "高"
+        description: "≥ 4.0，深度回归，100% 原有用例 + 补充交叉影响用例"
+      - value: "中"
+        description: "2.0 - 3.9，重点回归，P0/P1 + 关键接口 + 数据验证"
+      - value: "低"
+        description: "1.0 - 1.9，冒烟回归，仅关键流程验证"
+      - value: "微"
+        description: "0.1 - 0.9，极简回归，核心冒烟"
+      - value: "无关"
+        description: "0.0，仅核心链路冒烟"
+
+  - id: TC_REG_DEPTH
+    name: "回归深度"
+    group: regression
+    type: enum
+    required: false
+    description: "该用例对应的回归深度策略"
+    options:
+      - value: "全量"
+        description: "所有原有用例纳入回归，并新增交叉影响补充用例"
+      - value: "重点"
+        description: "选取 P0/P1 用例纳入回归，补充关键接口和数据验证"
+      - value: "冒烟"
+        description: "仅执行关键流程的冒烟级别验证"
+      - value: "极简"
+        description: "仅验证最基础功能可用"
+
+  - id: TC_PROD_GATE
+    name: "Prod回归门禁"
+    group: regression
+    type: boolean
+    required: false
+    default: false
+    description: "该用例是否属于生产环境上线前的回归门禁必执行用例"
+
+  # ==========================================================================
+  # 执行追踪字段 (Execution)
+  # ==========================================================================
+
+  - id: TC_EXEC_STATUS
+    name: "执行状态"
+    group: execution
+    type: enum
+    required: false
+    description: "测试执行后的状态，执行前为空"
+    options:
+      - value: "通过"
+        description: "实际结果与预期结果一致"
+        color: "green"
+      - value: "失败"
+        description: "实际结果与预期结果不一致"
+        color: "red"
+      - value: "阻塞"
+        description: "因环境/数据/外部依赖问题无法执行"
+        color: "orange"
+      - value: "跳过"
+        description: "经评估决定跳过不执行"
+        color: "gray"
+      - value: "未执行"
+        description: "尚未执行"
+        color: "light-gray"
+
+  - id: TC_EXECUTOR
+    name: "执行人"
+    group: execution
+    type: string
+    required: false
+    description: "执行该用例的测试人员姓名"
+
+  - id: TC_EXEC_DATE
+    name: "执行日期"
+    group: execution
+    type: string
+    required: false
+    format: "YYYY-MM-DD"
+    description: "执行该用例的日期"
+
+  - id: TC_BUG_ID
+    name: "关联缺陷ID"
+    group: execution
+    type: string
+    required: false
+    description: "当执行状态为「失败」时，关联的缺陷/Bug编号"
+    examples:
+      - "BUG-012"
+      - "JIRA-1234"
+
+  # ==========================================================================
+  # 元数据字段 (Meta)
+  # ==========================================================================
+
+  - id: TC_NOTES
+    name: "备注"
+    group: meta
+    type: string
+    required: false
+    description: "补充说明、注意事项、特殊配置要求等"
+    examples:
+      - "该用例依赖A方支付沙箱环境，需提前申请测试商户号"
+      - "弱网环境使用 Charles 限速至 2G"
+      - "v2.2 版本新增此用例"
+
+  - id: TC_CREATED_BY
+    name: "创建人"
+    group: meta
+    type: string
+    required: false
+    description: "用例创建者"
+
+  - id: TC_CREATED_DATE
+    name: "创建日期"
+    group: meta
+    type: string
+    required: false
+    format: "YYYY-MM-DD"
+    description: "用例创建日期"
+
+  - id: TC_VERSION
+    name: "版本号"
+    group: meta
+    type: string
+    required: false
+    description: "该用例首次出现或被修改时的产品版本号"
+    examples:
+      - "v1.0.0"
+      - "v2.1.0"
+
+# ============================================================================
+# Excel 列映射 (Column Mapping)
+# 按此顺序生成 Excel 表头
+# ============================================================================
+
+excel_column_order:
+  - column: "A"
+    field: TC_ID
+  - column: "B"
+    field: TC_MODULE
+  - column: "C"
+    field: TC_FUNCTION
+  - column: "D"
+    field: TC_TYPE
+  - column: "E"
+    field: TC_PRIORITY
+  - column: "F"
+    field: TC_NAME
+  - column: "G"
+    field: TC_PRECONDITION
+  - column: "H"
+    field: TC_STEPS
+  - column: "I"
+    field: TC_TEST_DATA
+  - column: "J"
+    field: TC_DATA_PREP
+  - column: "K"
+    field: TC_EXPECTED
+  - column: "L"
+    field: TC_ACTUAL
+  - column: "M"
+    field: TC_ENV
+  - column: "N"
+    field: TC_ENV_CONSTRAINT
+  - column: "O"
+    field: TC_PREDECESSOR
+  - column: "P"
+    field: TC_SUCCESSOR
+  - column: "Q"
+    field: TC_REQUIREMENT
+  - column: "R"
+    field: TC_TEST_POINT
+  - column: "S"
+    field: TC_UP_TAG
+  - column: "T"
+    field: TC_PERSONA
+  - column: "U"
+    field: TC_IS_REGRESSION
+  - column: "V"
+    field: TC_REG_TRIGGER
+  - column: "W"
+    field: TC_PROXIMITY
+  - column: "X"
+    field: TC_REG_DEPTH
+  - column: "Y"
+    field: TC_PROD_GATE
+  - column: "Z"
+    field: TC_EXEC_STATUS
+  - column: "AA"
+    field: TC_EXECUTOR
+  - column: "AB"
+    field: TC_EXEC_DATE
+  - column: "AC"
+    field: TC_BUG_ID
+  - column: "AD"
+    field: TC_NOTES
+
+# ============================================================================
+# 字段完整性检查清单
+# 生成或审查用例时必须逐项检查
+# ============================================================================
+
+completeness_checklist:
+  - check: "每条用例都有唯一且格式正确的编号"
+    severity: error
+  - check: "每条用例都已分配优先级（P0-P3）"
+    severity: error
+  - check: "每条用例名称长度 ≤ 80 字符，语义清晰"
+    severity: warning
+  - check: "前置条件具体可验证，无模糊描述"
+    severity: warning
+  - check: "测试步骤编号连续，每步可独立执行"
+    severity: error
+  - check: "测试数据字段有具体值，无 '有效数据' 等模糊描述"
+    severity: warning
+  - check: "预期结果与测试步骤可逐条对应验证"
+    severity: error
+  - check: "P0 用例标记了所有环境为适用环境"
+    severity: warning
+  - check: "回归用例的相近度等级与回归深度对等"
+    severity: error
+  - check: "用户视角用例标注了标签和用户画像"
+    severity: warning

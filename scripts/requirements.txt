@@ -1,0 +1,26 @@
+# Python 依赖清单
+# 版本: v1.0
+# 用途: 测试 Skill 需要在各平台安装的 Python 包
+
+# ── 核心依赖（必须安装） ──────────────────────────────────
+openpyxl>=3.1.0          # Excel 文件读写与格式化
+pandas>=2.0.0            # 数据分析和统计
+
+# ── 图表依赖（生成可视化图表） ──────────────────────────────
+matplotlib>=3.8.0        # 图表生成（饼图/柱状图/雷达图/折线图）
+
+# ── 可选依赖（增强功能） ──────────────────────────────────
+# numpy>=1.26.0          # 数学计算（matplotlib 自动安装）
+# xlsxwriter>=3.1.0      # 替代 Excel 引擎（可选）
+# pyyaml>=6.0            # YAML 配置解析（可选）
+
+# ──────────────────────────────────────────────────────────
+# 一键安装命令：
+#   pip install -r requirements.txt
+#
+# SOLO 平台注意：
+#   pip install openpyxl matplotlib pandas --break-system-packages
+#
+# 安装后验证命令：
+#   python3 -c "import openpyxl, matplotlib, pandas; print('ALL OK')"
+# ──────────────────────────────────────────────────────────

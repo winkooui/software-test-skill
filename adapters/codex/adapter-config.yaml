@@ -1,0 +1,206 @@
+# Codex (OpenAI) 平台适配器配置
+# Codex Platform Adapter Configuration
+# 版本: v1.0
+# 注意：Codex 功能受限，此适配器提供降级支持
+
+platform: codex
+version: "latest"
+
+# ============================================================================
+# 工具映射 (Tool Mapping)
+# ============================================================================
+
+tool_mapping:
+  file_read: "文件读取"
+  file_write: "文件写入"
+  file_append: "文件追加"
+  file_list: "目录浏览"
+  file_exists: "文件存在检查"
+  
+  command_execute: "终端"
+  command_check_status: "进程检查"
+  
+  web_search: "搜索"
+  web_fetch: "网页获取"
+  
+  user_interact: "对话"
+  code_search: "代码搜索"
+
+# ============================================================================
+# 路径映射 (Path Mapping)
+# ============================================================================
+
+path_mapping:
+  PROJECT_ROOT: "{upload_directory}"
+  SESSION_ID: "N/A"
+  WORKSPACE_DIR: "{upload_directory}"
+  TEMP_DIR: "/tmp"
+
+# ============================================================================
+# 能力声明 (Capability Declaration)
+# 注意：Codex 能力受限
+# ============================================================================
+
+capabilities:
+  python_available: false  # 不支持运行时 Python 执行
+  python_version: "N/A"
+  
+  excel_generation: false
+  chart_embedding: false
+  
+  skill_nesting: false
+  todo_tracking: false
+  
+  web_search: true
+  web_fetch: true
+  
+  file_system: "restricted"  # 仅能访问上传的文件
+  command_execution: "none"  # 不支持命令执行
+
+# ============================================================================
+# 依赖安装 (Dependencies)
+# ============================================================================
+
+dependencies:
+  python_packages: []  # 不支持安装
+  notes: "Codex 不支持运行时 Python 执行，所有 Python 脚本需用户本地运行"
+
+# ============================================================================
+# Skill 元数据格式 (Skill Metadata Format)
+# Codex 使用自定义 GPT 配置或 Instructions
+# ============================================================================
+
+metadata:
+  format: "gpt_instructions"
+  
+  instructions_template: |
+    # 软件测试 Skill 套件
+    
+    你是一个软件测试专家，帮助用户生成测试用例和测试报告。
+    
+    ## 能力范围
+    - 分析需求文档，生成测试用例
+    - 分析测试执行数据，生成测试报告
+    
+    ## 限制说明
+    - 本环境不支持生成 Excel 文件
+    - 输出格式为 Markdown 表格和文本
+    - 如需 Excel，请复制内容到本地生成
+    
+    ## 使用方法
+    1. 上传需求文档或测试追踪表
+    2. 说明需要生成用例还是报告
+    3. 按提示提供补充信息
+
+# ============================================================================
+# 特殊处理 (Special Handling)
+# ============================================================================
+
+special_handling:
+  # Codex 通过对话交互
+  user_interact:
+    native_support: true
+    mode: "conversation"
+    
+  # Codex 不支持命令执行
+  command_execution:
+    supported: false
+    note: "所有需要命令执行的步骤需提示用户手动执行"
+    
+  # Codex 不支持 Excel 生成
+  excel_generation:
+    supported: false
+    fallback: |
+      输出 Markdown 表格格式，用户可复制到 Excel：
+      
+      | 列1 | 列2 | 列3 |
+      |-----|-----|-----|
+      | ... | ... | ... |
+      
+      同时提供 CSV 格式：
+      ```
+      列1,列2,列3
+      ...,...,...
+      ```
+    
+  # Codex 不支持图表嵌入
+  chart_embedding:
+    supported: false
+    fallback: "使用 ASCII art 或文字描述"
+    
+  paths:
+    require_absolute: false
+    base: "上传目录"
+
+# ============================================================================
+# 降级策略覆盖 (Fallback Overrides)
+# 所有功能都需降级
+# ============================================================================
+
+fallback_overrides:
+  excel_generation: |
+    输出 Markdown 表格 + CSV 格式
+    提示用户："当前环境不支持 Excel 生成，
+    请复制以下内容到 Excel 或使用本地 Python 脚本生成"
+  
+  chart_embedding: |
+    使用 ASCII art 或文字描述图表
+    示例：
+    ```
+    通过率
+    100% | ████████████████████
+     80% | ████████████████░░░░
+     60% | ████████████░░░░░░░░
+    ```
+  
+  command_execute: |
+    提示用户手动执行命令：
+    "请在本地终端执行以下命令：
+     ```bash
+     {command}
+     ```
+     执行后将结果粘贴给我"
+  
+  python_scripts: |
+    提供 Python 脚本内容，让用户在本地运行：
+    "请保存以下脚本为 script.py 并在本地运行：
+     ```python
+     {script_content}
+     ```"
+
+# ============================================================================
+# 输出配置 (Output Configuration)
+# ============================================================================
+
+output:
+  default_format: "markdown"
+  fallback_format: "text"
+  
+  # Codex 只能输出文本
+  formats:
+    - "markdown"  # 首选
+    - "csv"       # 作为代码块嵌入
+    - "text"      # 纯文本
+  
+  notes: |
+    Codex 环境限制：
+    1. 无法生成 .xlsx 文件
+    2. 无法执行本地命令
+    3. 无法运行 Python 脚本
+    
+    建议工作流程：
+    1. 在 Codex 中完成分析和文本输出
+    2. 复制内容到本地
+    3. 使用本地 Python 环境生成 Excel
+
+# ============================================================================
+# 平台检测规则 (Platform Detection)
+# ============================================================================
+
+detection_rules:
+  - type: "ui_element"
+    element: "ChatGPT / Codex 界面"
+  - type: "env_var"
+    var: "OPENAI_API_KEY"
+  - type: "feature_check"
+    feature: "不支持 Bash 工具"

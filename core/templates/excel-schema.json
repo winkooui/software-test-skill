@@ -1,0 +1,223 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://software-test-skill/templates/excel-schema.json",
+  "title": "ExcelTemplateSchema",
+  "description": "Excel 输出文件的结构定义 — 测试用例生成 + 测试报告生成",
+  "version": "2.3",
+
+  "test_case_workbook": {
+    "filename_pattern": "测试用例_{project_name}_v{version}.xlsx",
+    "sheets": {
+      "sheet_01_test_cases": {
+        "name": "测试用例主表",
+        "description": "全量测试用例记录",
+        "columns": "A-AD (30列)",
+        "header_row": 1,
+        "data_start_row": 2,
+        "freeze_panes": "A2",
+        "column_widths": {
+          "A": 22, "B": 14, "C": 14, "D": 12, "E": 8,
+          "F": 35, "G": 30, "H": 35, "I": 30, "J": 12,
+          "K": 35, "L": 30, "M": 16, "N": 20, "O": 22,
+          "P": 22, "Q": 18, "R": 22, "S": 14, "T": 14,
+          "U": 12, "V": 22, "W": 12, "X": 10, "Y": 12,
+          "Z": 12, "AA": 12, "AB": 14, "AC": 16, "AD": 30
+        },
+        "conditional_formatting": [
+          {
+            "column": "E",
+            "rule": "P0",
+            "style": { "background": "#FEE2E2", "font": { "color": "#991B1B", "bold": true } }
+          },
+          {
+            "column": "E",
+            "rule": "P1",
+            "style": { "background": "#FEF3C7", "font": { "color": "#92400E" } }
+          },
+          {
+            "column": "Z",
+            "rule": "通过",
+            "style": { "background": "#D1FAE5", "font": { "color": "#065F46" } }
+          },
+          {
+            "column": "Z",
+            "rule": "失败",
+            "style": { "background": "#FEE2E2", "font": { "color": "#991B1B", "bold": true } }
+          },
+          {
+            "column": "Z",
+            "rule": "阻塞",
+            "style": { "background": "#FED7AA", "font": { "color": "#9A3412" } }
+          }
+        ]
+      },
+      "sheet_02_feature_tree": {
+        "name": "功能树",
+        "description": "产品功能层级结构",
+        "columns": ["层级", "模块/功能名称", "功能描述", "用例数量", "已覆盖", "优先级"],
+        "column_widths": { "A": 8, "B": 22, "C": 40, "D": 12, "E": 10, "F": 10 }
+      },
+      "sheet_03_scope": {
+        "name": "测试范围与边界",
+        "description": "测试范围定义、环境配置、假设依赖",
+        "columns": ["项目", "内容"],
+        "rows": [
+          "测试范围(In Scope)",
+          "测试范围外(Out of Scope)",
+          "测试平台",
+          "测试环境要求",
+          "假设与依赖",
+          "风险与注意事项"
+        ]
+      },
+      "sheet_04_test_data": {
+        "name": "测试数据清单",
+        "description": "测试数据准备清单",
+        "columns": ["数据ID", "数据类型", "数据名称", "数据内容", "使用场景", "准备方式", "准备状态", "优先级", "备注"],
+        "column_widths": { "A": 14, "B": 12, "C": 22, "D": 30, "E": 30, "F": 12, "G": 12, "H": 10, "I": 30 }
+      },
+      "sheet_05_business_flow": {
+        "name": "业务流程串联图",
+        "description": "端到端业务流程与用例串联",
+        "columns": ["业务流程名称", "流程环节数", "环节1用例", "环节2用例", "...", "流程完整性", "断点说明"]
+      },
+      "sheet_06_review_report": {
+        "name": "评审报告",
+        "description": "测试用例评审结论",
+        "columns": ["审查维度", "检查结果", "覆盖率/得分", "状态", "补充说明"]
+      },
+      "sheet_07_env_mapping": {
+        "name": "环境-用例映射表",
+        "description": "用例在各环境的执行标记",
+        "columns": ["用例编号", "用例名称", "沙箱环境", "SIT环境", "UAT环境", "生产环境", "环境说明"]
+      },
+      "sheet_08_user_perspective": {
+        "name": "用户视角测试清单",
+        "description": "用户视角用例汇总",
+        "columns": ["功能模块", "用户画像", "用例编号", "测试场景", "用户可能的操作", "系统预期响应", "风险等级"]
+      },
+      "sheet_09_proximity": {
+        "name": "变更相近度分析报表",
+        "description": "各功能点与变更的相近度得分",
+        "columns": ["功能点", "代码(0-5)", "数据(0-5)", "API(0-5)", "业务(0-5)", "UI(0-5)", "综合", "等级", "回归深度", "建议回归数", "用户补充"]
+      },
+      "sheet_10_regression_scope": {
+        "name": "回归范围确认单",
+        "description": "回归测试范围确认记录",
+        "columns": ["确认项", "初始建议", "用户调整", "最终确认", "确认状态"]
+      },
+      "sheet_11_prod_gate": {
+        "name": "Prod上线回归门禁检查单",
+        "description": "生产环境上线前回归门禁",
+        "columns": ["检查项", "要求", "结果", "阻塞原因", "责任人"]
+      }
+    }
+  },
+
+  "test_report_workbook": {
+    "filename_pattern": "测试报告_{project_name}_v{version}_{date}.xlsx",
+    "sheets": {
+      "sheet_01_dashboard": {
+        "name": "Dashboard",
+        "description": "KPI 指标卡片 + 项目基本信息",
+        "kpi_metrics": [
+          { "label": "总用例数", "source": "COUNT(sheet_09)" },
+          { "label": "通过数", "source": "COUNTIF(sheet_09, 通过)" },
+          { "label": "失败数", "source": "COUNTIF(sheet_09, 失败)" },
+          { "label": "阻塞数", "source": "COUNTIF(sheet_09, 阻塞)" },
+          { "label": "通过率", "source": "通过数/总用例数" },
+          { "label": "缺陷总数", "source": "COUNT(sheet_10)" },
+          { "label": "上线就绪度", "source": "来自风险评估计算" }
+        ],
+        "charts": [
+          { "type": "pie", "title": "整体执行结果分布", "data": "通过/失败/阻塞/未执行" }
+        ]
+      },
+      "sheet_02_execution_summary": {
+        "name": "执行概览",
+        "description": "按优先级/模块的执行统计表",
+        "charts": [
+          { "type": "bar_stacked", "title": "各模块执行状态", "data": "模块 × 状态(通过/失败/阻塞)" }
+        ]
+      },
+      "sheet_03_feature_coverage": {
+        "name": "功能覆盖",
+        "description": "功能树 + 通过率标注",
+        "columns": ["模块", "功能点", "用例数", "已执行", "通过", "失败", "通过率"]
+      },
+      "sheet_04_pass_rate_analysis": {
+        "name": "通过率分析",
+        "description": "按模块/类型/优先级的通过率明细",
+        "charts": [
+          { "type": "radar", "title": "测试类型覆盖度", "data": "测试类型 × 覆盖率" }
+        ]
+      },
+      "sheet_05_execution_trend": {
+        "name": "执行趋势",
+        "description": "每日执行进度 + 累积趋势",
+        "charts": [
+          { "type": "line", "title": "累积执行数 vs 通过数 vs 日期", "data": "日期 × 累积数" }
+        ]
+      },
+      "sheet_06_defect_analysis": {
+        "name": "缺陷分析",
+        "description": "缺陷总览 + 分布 + 趋势",
+        "charts": [
+          { "type": "pie", "title": "缺陷严重程度分布", "data": "严重度 × 数量" },
+          { "type": "bar", "title": "缺陷模块分布", "data": "模块 × 数量" },
+          { "type": "line", "title": "缺陷趋势", "data": "日期 × 新增/关闭/累积" }
+        ]
+      },
+      "sheet_07_efficiency": {
+        "name": "效率分析",
+        "description": "执行效率指标",
+        "metrics": ["日均执行用例数", "缺陷发现率", "人均执行数", "缺陷修复周期中位数"]
+      },
+      "sheet_08_risk_assessment": {
+        "name": "风险评估",
+        "description": "风险清单 + 上线就绪度评分 + 结论建议",
+        "charts": [
+          { "type": "progress_bar", "title": "上线就绪度", "data": "评分/100" }
+        ]
+      },
+      "sheet_09_execution_detail": {
+        "name": "执行明细",
+        "description": "全量用例执行记录（可筛选）",
+        "columns": ["用例编号", "模块", "名称", "优先级", "状态", "缺陷ID", "执行人", "执行日期", "备注"]
+      },
+      "sheet_10_defect_list": {
+        "name": "缺陷清单",
+        "description": "缺陷详细列表",
+        "columns": ["缺陷ID", "关联用例", "标题", "严重程度", "状态", "发现日期", "修复日期", "负责人", "描述"]
+      }
+    }
+  },
+
+  "styling": {
+    "font": { "family": "Arial", "size_header": 11, "size_body": 10 },
+    "header": {
+      "fill": "#1F2937",
+      "font_color": "#FFFFFF",
+      "bold": true,
+      "alignment": "center",
+      "row_height": 28
+    },
+    "zebra_striping": {
+      "even_row": "#FFFFFF",
+      "odd_row": "#F7F9FC"
+    },
+    "borders": {
+      "thin": "#D9DEE7",
+      "medium": "#AAB4C5"
+    },
+    "kpi_highlight": {
+      "fill": "#EAF2FF",
+      "font": { "bold": true, "color": "#1F2937" }
+    },
+    "risk_colors": {
+      "high": { "fill": "#FEE2E2", "font": "#991B1B" },
+      "medium": { "fill": "#FED7AA", "font": "#9A3412" },
+      "low": { "fill": "#FEF3C7", "font": "#92400E" }
+    }
+  }
+}

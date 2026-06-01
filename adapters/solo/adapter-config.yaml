@@ -1,0 +1,162 @@
+# SOLO 平台适配器配置
+# SOLO Platform Adapter Configuration
+# 版本: v1.0
+
+platform: solo
+version: ">=1.0"
+
+# ============================================================================
+# 工具映射 (Tool Mapping)
+# 将通用能力契约映射到 SOLO 实际工具名
+# ============================================================================
+
+tool_mapping:
+  file_read: "Read"
+  file_write: "Write"
+  file_append: "SearchReplace (追加模式)"
+  file_list: "LS / Glob"
+  file_exists: "LS + 判断"
+  
+  command_execute: "RunCommand"
+  command_check_status: "CheckCommandStatus"
+  
+  web_search: "WebSearch"
+  web_fetch: "WebFetch"
+  
+  user_interact: "AskUserQuestion"
+  code_search: "Grep / SearchCodebase"
+
+# ============================================================================
+# 路径映射 (Path Mapping)
+# 将通用路径变量映射到 SOLO 实际路径
+# ============================================================================
+
+path_mapping:
+  PROJECT_ROOT: "/sessions/{session_id}/workspace"
+  SESSION_ID: "从环境推断"
+  WORKSPACE_DIR: "/sessions/{session_id}/workspace"
+  TEMP_DIR: "/sessions/{session_id}/work"
+  
+  # SOLO 特有路径
+  UPLOADS_DIR: "/sessions/{session_id}/uploads"
+
+# ============================================================================
+# 能力声明 (Capability Declaration)
+# ============================================================================
+
+capabilities:
+  python_available: true
+  python_version: "3.10+"
+  
+  excel_generation: true
+  chart_embedding: true
+  
+  skill_nesting: true
+  todo_tracking: true
+  
+  web_search: true
+  web_fetch: true
+  
+  file_system: "full"  # full / restricted / none
+  command_execution: "full"
+
+# ============================================================================
+# 依赖安装 (Dependencies)
+# ============================================================================
+
+dependencies:
+  python_packages:
+    - name: openpyxl
+      version: ">=3.1.0"
+      install_cmd: "pip install openpyxl --break-system-packages"
+    - name: matplotlib
+      version: ">=3.8.0"
+      install_cmd: "pip install matplotlib --break-system-packages"
+    - name: pandas
+      version: ">=2.0.0"
+      install_cmd: "pip install pandas --break-system-packages"
+
+# ============================================================================
+# Skill 元数据格式 (Skill Metadata Format)
+# SOLO 通过 Skill 工具加载，无 frontmatter 要求
+# ============================================================================
+
+metadata:
+  format: "plain_markdown"
+  trigger: "Skill tool invocation"
+  
+  # SOLO Skill 特有的配置
+  solo_specific:
+    skill_name: "software-test-skill"
+    description: "软件测试全生命周期 Skill 套件"
+    # 在 SOLO 中通过 Skill 工具调用时传入
+
+# ============================================================================
+# 特殊处理 (Special Handling)
+# ============================================================================
+
+special_handling:
+  # SOLO 的 AskUserQuestion 支持多选和选项
+  user_interact:
+    native_support: true
+    max_questions_per_call: 4
+    supports_multi_select: true
+    
+  # SOLO 的 Skill 工具支持嵌套调用
+  skill_nesting:
+    native_support: true
+    max_nesting_depth: 3
+    
+  # SOLO 的 TodoWrite 工具
+  todo_tracking:
+    native_support: true
+    tool_name: "TodoWrite"
+    
+  # SOLO 的文件路径是绝对路径
+  paths:
+    require_absolute: true
+    session_based: true
+
+# ============================================================================
+# 降级策略覆盖 (Fallback Overrides)
+# 如果平台有原生支持，覆盖通用降级策略
+# ============================================================================
+
+fallback_overrides:
+  user_interact: "使用 AskUserQuestion 工具"
+  skill_nesting: "使用 Skill 工具嵌套调用"
+  todo_tracking: "使用 TodoWrite 工具"
+
+# ============================================================================
+# 输出配置 (Output Configuration)
+# ============================================================================
+
+output:
+  default_format: "xlsx"
+  fallback_format: "csv+markdown"
+  
+  # SOLO 的输出目录
+  directories:
+    final_output: "{WORKSPACE_DIR}"
+    temp_files: "{TEMP_DIR}"
+    
+  # 文件命名规范
+  naming_convention:
+    test_cases: "测试用例_{project_name}_v{version}.xlsx"
+    test_report: "测试报告_{project_name}_v{version}_{date}.xlsx"
+    proximity_report: "相近度分析报表_{project_name}.md"
+
+# ============================================================================
+# 平台检测规则 (Platform Detection)
+# 用于自动识别当前是否在 SOLO 平台
+# ============================================================================
+
+detection_rules:
+  - type: "tool_available"
+    tool: "AskUserQuestion"
+  - type: "tool_available"
+    tool: "TodoWrite"
+  - type: "path_pattern"
+    pattern: "/sessions/"
+  - type: "env_var"
+    var: "SOLO_SESSION_ID"
