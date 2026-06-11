@@ -33,6 +33,7 @@ python scripts/generate_report.py \
   --out-dir test-output
 
 python scripts/validate_schema.py --root .
+python scripts/evaluate_quality.py --input examples/sample-test-cases.csv --min-score 75
 python -m unittest discover -s tests -v
 ```
 
@@ -52,6 +53,7 @@ test-output/
 - [示例测试用例 CSV](./examples/sample-test-cases.csv)
 - [示例执行记录 CSV](./examples/execution-records.csv)
 - [示例测试报告](./examples/sample-report.md)
+- [登录场景 Benchmark](./benchmarks/login/evaluation.md)
 
 ## Core Capabilities
 
@@ -174,7 +176,7 @@ See [ROADMAP.md](./ROADMAP.md) for the full roadmap.
 - 增加真实项目脱敏案例和输出截图。
 - 增加完整 `.xlsx` 示例产物。
 - 增加更多平台的安装脚本。
-- 增加基于 JSON Schema 的严格校验。
+- 增加更严格的 JSON Schema 运行时校验。
 - 增加缺陷趋势图和报告截图生成脚本。
 
 ## Contributing

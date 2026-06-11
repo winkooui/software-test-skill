@@ -19,5 +19,8 @@ jobs:
       - name: Validate schemas and examples
         run: python scripts/validate_schema.py --root .
 
+      - name: Evaluate sample quality
+        run: python scripts/evaluate_quality.py --input examples/sample-test-cases.csv --min-score 75
+
       - name: Run tests
         run: python -m unittest discover -s tests -v

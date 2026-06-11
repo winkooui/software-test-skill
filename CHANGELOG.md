@@ -5,7 +5,10 @@
 - Added runnable demo scripts for test case generation and test report generation.
 - Added example PRD, execution records, sample test cases, and sample report.
 - Added schema/example validation script.
-- Added unittest smoke tests.
+- Added proximity model helper and quality evaluation script.
+- Added negative input examples for validation tests.
+- Added login benchmark with expected coverage and quality gate.
+- Added unittest coverage for readiness scoring, proximity scoring, validation failures, adapter configs, and benchmark quality.
 - Added GitHub Actions CI workflow.
 - Added `agents/openai.yaml` metadata for OpenAI/Codex skill presentation.
 - Reworked README for faster GitHub onboarding.

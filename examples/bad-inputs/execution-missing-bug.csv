@@ -1,0 +1,2 @@
+case_id,module,case_name,test_type,priority,status,actual_result_detail,executor,exec_date,exec_env,bug_id,bug_severity,bug_status,exec_duration_min,retry_count,notes
+TC-AUTH-01-001-F,认证登录,错误密码不暴露账号存在性,安全测试,P0,失败,错误文案泄露账号存在性,Ada,2026-06-10,SIT,,严重,待修复,5,0,故意缺少bug_id

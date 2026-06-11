@@ -1,0 +1,23 @@
+{
+  "benchmark": "login-security",
+  "minimum_cases": 5,
+  "required_functions": [
+    "账号密码登录",
+    "错误次数锁定",
+    "跳转恢复",
+    "移动端体验"
+  ],
+  "required_test_types": [
+    "功能测试",
+    "安全测试",
+    "回归测试",
+    "用户视角测试"
+  ],
+  "required_risks": [
+    "账号枚举",
+    "外部redirect_url",
+    "错误次数锁定",
+    "移动端布局"
+  ],
+  "minimum_quality_score": 75
+}

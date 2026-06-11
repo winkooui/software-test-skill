@@ -6,6 +6,7 @@
 - Add `.xlsx` sample artifacts generated from the demo scripts.
 - Add stricter JSON Schema validation through an optional `jsonschema` dependency.
 - Add more example PRDs: payment, order workflow, permissions, notification center.
+- Add benchmark scorecards for payment and permission workflows.
 
 ## Mid Term
 

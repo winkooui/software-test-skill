@@ -16,6 +16,7 @@ Thanks for helping improve `software-test-skill`.
 
    ```bash
    python scripts/validate_schema.py --root .
+   python scripts/evaluate_quality.py --input examples/sample-test-cases.csv --min-score 75
    ```
 
 2. Run tests:

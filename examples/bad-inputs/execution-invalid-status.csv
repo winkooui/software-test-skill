@@ -1,0 +1,2 @@
+case_id,module,case_name,test_type,priority,status,actual_result_detail,executor,exec_date,exec_env,bug_id,bug_severity,bug_status,exec_duration_min,retry_count,notes
+TC-AUTH-01-001-F,认证登录,正确账号密码登录成功,功能测试,P0,成功,,Ada,2026-06-10,SIT,,,,3,0,故意使用非法状态

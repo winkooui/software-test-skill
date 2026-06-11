@@ -6,8 +6,8 @@
 |------|------|
 | 名称 | `software-test-skill` |
 | 版本 | v2.4 |
-| 文件总数 | 38 个 |
-| 代码总行数 | 约 6,226 行 |
+| 文件总数 | 52 个 |
+| 代码总行数 | 约 6,767 行 |
 | 语言 | YAML / Markdown / JSON / Python (requirements.txt) |
 | 目标平台 | SOLO、Claude Code、Trae、Qoder、Codex |
 
@@ -22,6 +22,7 @@ software-test-skill/
 ├── adapters/                   ← 平台适配层
 ├── scripts/                    ← 可执行脚本与依赖
 ├── examples/                   ← 示例 PRD、执行记录、输出样例
+├── benchmarks/                 ← 可量化质量评估案例
 ├── tests/                      ← 自测用例
 ├── agents/                     ← OpenAI UI 元数据
 └── .github/workflows/          ← CI 校验
@@ -106,7 +107,9 @@ software-test-skill/
 | `requirements.txt` | Python | 26 | Python 依赖清单。核心依赖：openpyxl≥3.1.0、pandas≥2.0.0、matplotlib≥3.8.0。含一键安装命令和各平台注意事项（SOLO 需 `--break-system-packages`）、安装后验证命令。 |
 | `generate_test_cases.py` | Python | 249 | 从示例 PRD 生成测试用例 CSV/Markdown；若安装 openpyxl，则额外输出 Excel。用于 GitHub 访客本地试跑。 |
 | `generate_report.py` | Python | 199 | 从执行记录 CSV 生成测试报告 Markdown、模块统计 CSV；若安装 openpyxl，则额外输出 Excel。 |
-| `validate_schema.py` | Python | 100 | 校验 JSON 模板可解析、示例测试用例 CSV 和执行记录 CSV 满足核心约束。 |
+| `validate_schema.py` | Python | 134 | 校验 JSON 模板可解析、测试用例 CSV 和执行记录 CSV 满足核心约束；支持额外传入正向/负向样例文件。 |
+| `proximity_model.py` | Python | 80 | 相近度模型的确定性实现，覆盖五维加权、边界分类、DDL 强制提级和校准规则。 |
+| `evaluate_quality.py` | Python | 99 | 测试用例质量评分脚本，检查 P0、用户视角、回归、Prod 门禁、测试类型和数据/预期结果完备性。 |
 
 ---
 
@@ -118,8 +121,15 @@ software-test-skill/
 | `examples/sample-test-cases.csv` | 已提供 | 结构化测试用例样例，字段对齐测试用例 Schema。 |
 | `examples/execution-records.csv` | 已提供 | 测试执行追踪数据样例，包含通过、失败、阻塞、跳过状态。 |
 | `examples/sample-report.md` | 已提供 | 测试报告输出样例，展示 KPI、风险和结论格式。 |
+| `examples/bad-inputs/` | 已提供 | 故意非法的输入样例，用于验证失败用例缺陷 ID、非法状态、非法编号、回归元数据缺失等负向规则。 |
+| `benchmarks/login/` | 已提供 | 登录安全场景 benchmark，定义最小覆盖、必需测试类型、风险点和质量门禁。 |
 | `tests/test_examples.py` | 已提供 | 基于 unittest 的示例数据和生成脚本 smoke test。 |
-| `.github/workflows/ci.yml` | 已提供 | GitHub Actions：校验 schema/examples 并运行测试。 |
+| `tests/test_readiness_scoring.py` | 已提供 | 上线就绪度评分和结论分级测试。 |
+| `tests/test_proximity_model.py` | 已提供 | 相近度权重、边界、校准和异常值测试。 |
+| `tests/test_validation_negative.py` | 已提供 | 负向输入校验测试。 |
+| `tests/test_adapter_configs.py` | 已提供 | 四平台 adapter 关键块和 Codex 降级能力声明测试。 |
+| `tests/test_benchmarks.py` | 已提供 | 登录 benchmark 元数据和生成质量门禁测试。 |
+| `.github/workflows/ci.yml` | 已提供 | GitHub Actions：校验 schema/examples、质量评估并运行测试。 |
 | `agents/openai.yaml` | 已提供 | OpenAI/Codex UI 展示元数据与默认提示。 |
 
 ---
@@ -128,20 +138,21 @@ software-test-skill/
 
 | 分类 | 文件数 | 行数 | 占比 |
 |------|--------|------|------|
-| 核心 Prompt | 1 | 464 | 7.6% |
-| 工作流定义 | 2 | 549 | 9.0% |
-| 分析框架 | 5 | 868 | 14.2% |
-| 数据 Schema | 3 | 977 | 15.9% |
-| 输出模板 | 3 | 466 | 7.6% |
-| 能力契约 | 1 | 414 | 6.8% |
-| 平台适配器 | 4 | 741 | 12.1% |
-| 示例输入输出 | 4 | 106 | 1.7% |
-| 脚本/依赖 | 4 | 574 | 9.4% |
-| 测试与 CI | 2 | 103 | 1.7% |
-| 入口与说明 | 4 | 803 | 13.1% |
+| 核心 Prompt | 1 | 464 | 6.9% |
+| 工作流定义 | 2 | 549 | 8.1% |
+| 分析框架 | 5 | 868 | 12.8% |
+| 数据 Schema | 3 | 977 | 14.4% |
+| 输出模板 | 3 | 466 | 6.9% |
+| 能力契约 | 1 | 414 | 6.1% |
+| 平台适配器 | 4 | 741 | 10.9% |
+| 示例输入输出 | 8 | 118 | 1.7% |
+| Benchmark | 3 | 60 | 0.9% |
+| 脚本/依赖 | 6 | 787 | 11.6% |
+| 测试与 CI | 7 | 328 | 4.8% |
+| 入口与说明 | 7 | 945 | 14.0% |
 | 元数据 | 1 | 8 | 0.1% |
 | 仓库配置 | 1 | 42 | 0.7% |
-| **合计** | **38** | **约 6,226** | **100%** |
+| **合计** | **52** | **约 6,767** | **100%** |
 
 ---
 
@@ -176,10 +187,11 @@ adapters/trae-qoder/adapter-config.yaml ─────────────�
 adapters/codex/adapter-config.yaml ───────────────────────────────┤
   │ 引用:  capability-contract.yaml (所有适配器)                    │
   ▼                                                                │
-scripts/ ──────────────── 示例生成、报告生成、schema 校验             │
+scripts/ ──────────────── 示例生成、报告生成、schema/质量/模型校验    │
 examples/ ─────────────── 示例 PRD、执行记录、测试用例、报告样例       │
-tests/ ────────────────── smoke test + 示例数据检查                  │
-.github/workflows/ci.yml ─ CI 调用 validate_schema.py 和 unittest     │
+benchmarks/ ───────────── 质量评估案例与期望覆盖                     │
+tests/ ────────────────── smoke、评分、模型、负向、adapter、benchmark │
+.github/workflows/ci.yml ─ CI 调用 validate_schema.py、quality、unittest │
 ```
 
 ---
