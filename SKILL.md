@@ -420,7 +420,10 @@ Skill：
 │   ├── capability-contract.yaml      ← 平台无关能力契约
 │   └── prompts/main-prompt.md        ← 原始完整 Prompt（参考）
 ├── adapters/                         ← 4 平台适配器配置
-├── scripts/requirements.txt          ← Python 依赖
+├── examples/                         ← 示例 PRD、执行记录、输出样例
+├── scripts/                          ← 示例生成、报告生成、校验脚本和依赖
+├── tests/                            ← 自测用例
+├── agents/openai.yaml                ← OpenAI/Codex UI 元数据
 └── LICENSE                           ← MIT 开源协议
 ```
 

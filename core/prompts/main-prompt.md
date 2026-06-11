@@ -1,6 +1,6 @@
 # 软件测试 Skill 套件 - 核心 Prompt
 # Software Test Skill Suite - Core Prompt
-# 版本: v2.3-universal
+# 版本: v2.4-universal
 # 说明: 此 Prompt 为平台无关版本，各平台适配器负责注入平台特定配置
 
 ---
@@ -460,5 +460,5 @@ Skill：
 
 ---
 
-*核心 Prompt 版本: v2.3-universal*
+*核心 Prompt 版本: v2.4-universal*
 *此文件为平台无关版本，需配合平台适配器使用*

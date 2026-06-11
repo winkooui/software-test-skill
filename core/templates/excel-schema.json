@@ -3,7 +3,7 @@
   "$id": "https://software-test-skill/templates/excel-schema.json",
   "title": "ExcelTemplateSchema",
   "description": "Excel 输出文件的结构定义 — 测试用例生成 + 测试报告生成",
-  "version": "2.3",
+  "version": "2.4",
 
   "test_case_workbook": {
     "filename_pattern": "测试用例_{project_name}_v{version}.xlsx",

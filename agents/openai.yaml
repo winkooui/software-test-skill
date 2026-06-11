@@ -1,0 +1,8 @@
+interface:
+  display_name: "Software Test Skill"
+  short_description: "Generate test cases, reports, and release gates"
+  brand_color: "#2563EB"
+  default_prompt: "Use $software-test-skill to turn this PRD into structured test cases and a release readiness report."
+
+policy:
+  allow_implicit_invocation: true

@@ -5,9 +5,9 @@
 | 维度 | 说明 |
 |------|------|
 | 名称 | `software-test-skill` |
-| 版本 | v2.3 |
-| 文件总数 | 21 个 |
-| 代码总行数 | 约 4,470 行 |
+| 版本 | v2.4 |
+| 文件总数 | 38 个 |
+| 代码总行数 | 约 6,226 行 |
 | 语言 | YAML / Markdown / JSON / Python (requirements.txt) |
 | 目标平台 | SOLO、Claude Code、Trae、Qoder、Codex |
 
@@ -21,8 +21,10 @@ software-test-skill/
 ├── core/                       ← 核心逻辑层（平台无关）
 ├── adapters/                   ← 平台适配层
 ├── scripts/                    ← 可执行脚本与依赖
-├── examples/                   ← 预留：示例输入输出
-└── tests/                      ← 预留：自测用例
+├── examples/                   ← 示例 PRD、执行记录、输出样例
+├── tests/                      ← 自测用例
+├── agents/                     ← OpenAI UI 元数据
+└── .github/workflows/          ← CI 校验
 ```
 
 ---
@@ -33,7 +35,7 @@ software-test-skill/
 
 | 文件 | 格式 | 行数 | 功能 |
 |------|------|------|------|
-| `SKILL.md` | Markdown | 54 | Skill 入口文件。含 YAML frontmatter（name、description），以及双模块核心能力速览、框架引用索引。安装时由 `npx skills add` 读取 frontmatter 注册。 |
+| `SKILL.md` | Markdown | 431 | Skill 入口文件。含 YAML frontmatter（name、description、license、triggers），以及双模块核心能力、平台自检、框架摘要、审查清单和使用示例。 |
 
 ---
 
@@ -102,15 +104,23 @@ software-test-skill/
 | 文件 | 格式 | 行数 | 功能 |
 |------|------|------|------|
 | `requirements.txt` | Python | 26 | Python 依赖清单。核心依赖：openpyxl≥3.1.0、pandas≥2.0.0、matplotlib≥3.8.0。含一键安装命令和各平台注意事项（SOLO 需 `--break-system-packages`）、安装后验证命令。 |
+| `generate_test_cases.py` | Python | 249 | 从示例 PRD 生成测试用例 CSV/Markdown；若安装 openpyxl，则额外输出 Excel。用于 GitHub 访客本地试跑。 |
+| `generate_report.py` | Python | 199 | 从执行记录 CSV 生成测试报告 Markdown、模块统计 CSV；若安装 openpyxl，则额外输出 Excel。 |
+| `validate_schema.py` | Python | 100 | 校验 JSON 模板可解析、示例测试用例 CSV 和执行记录 CSV 满足核心约束。 |
 
 ---
 
 ### 3.5 `examples/` 和 `tests/`
 
-| 目录 | 状态 | 说明 |
-|------|------|------|
-| `examples/` | 预留 | 将来存入示例 PRD 文档、示例执行追踪表、示例输出报告 |
-| `tests/` | 预留 | 将来存入自测用例（跨平台验证脚本、相近度计算测试等） |
+| 目录/文件 | 状态 | 说明 |
+|-----------|------|------|
+| `examples/prd-login.md` | 已提供 | 脱敏登录需求示例，用于演示 PRD 到测试用例的输入。 |
+| `examples/sample-test-cases.csv` | 已提供 | 结构化测试用例样例，字段对齐测试用例 Schema。 |
+| `examples/execution-records.csv` | 已提供 | 测试执行追踪数据样例，包含通过、失败、阻塞、跳过状态。 |
+| `examples/sample-report.md` | 已提供 | 测试报告输出样例，展示 KPI、风险和结论格式。 |
+| `tests/test_examples.py` | 已提供 | 基于 unittest 的示例数据和生成脚本 smoke test。 |
+| `.github/workflows/ci.yml` | 已提供 | GitHub Actions：校验 schema/examples 并运行测试。 |
+| `agents/openai.yaml` | 已提供 | OpenAI/Codex UI 展示元数据与默认提示。 |
 
 ---
 
@@ -118,16 +128,20 @@ software-test-skill/
 
 | 分类 | 文件数 | 行数 | 占比 |
 |------|--------|------|------|
-| 核心 Prompt | 1 | 464 | 10.4% |
-| 工作流定义 | 2 | 549 | 12.3% |
-| 分析框架 | 5 | 868 | 19.4% |
-| 数据 Schema | 3 | 977 | 21.9% |
-| 输出模板 | 3 | 466 | 10.4% |
-| 能力契约 | 1 | 414 | 9.3% |
-| 平台适配器 | 4 | 741 | 16.6% |
-| 脚本/依赖 | 1 | 26 | 0.6% |
-| 入口文件 | 1 | 54 | 1.2% |
-| **合计** | **21** | **约 4,470** | **100%** |
+| 核心 Prompt | 1 | 464 | 7.6% |
+| 工作流定义 | 2 | 549 | 9.0% |
+| 分析框架 | 5 | 868 | 14.2% |
+| 数据 Schema | 3 | 977 | 15.9% |
+| 输出模板 | 3 | 466 | 7.6% |
+| 能力契约 | 1 | 414 | 6.8% |
+| 平台适配器 | 4 | 741 | 12.1% |
+| 示例输入输出 | 4 | 106 | 1.7% |
+| 脚本/依赖 | 4 | 574 | 9.4% |
+| 测试与 CI | 2 | 103 | 1.7% |
+| 入口与说明 | 4 | 803 | 13.1% |
+| 元数据 | 1 | 8 | 0.1% |
+| 仓库配置 | 1 | 42 | 0.7% |
+| **合计** | **38** | **约 6,226** | **100%** |
 
 ---
 
@@ -162,11 +176,12 @@ adapters/trae-qoder/adapter-config.yaml ─────────────�
 adapters/codex/adapter-config.yaml ───────────────────────────────┤
   │ 引用:  capability-contract.yaml (所有适配器)                    │
   ▼                                                                │
-scripts/requirements.txt ─ 独立（无引用）                           │
-examples/ ───────────────── 预留                                   │
-tests/ ───────────────────── 预留                                   │
+scripts/ ──────────────── 示例生成、报告生成、schema 校验             │
+examples/ ─────────────── 示例 PRD、执行记录、测试用例、报告样例       │
+tests/ ────────────────── smoke test + 示例数据检查                  │
+.github/workflows/ci.yml ─ CI 调用 validate_schema.py 和 unittest     │
 ```
 
 ---
 
-*文档生成时间: 2026-05-25 | Skill 版本: v2.3*
+*文档更新时间: 2026-06-11 | Skill 版本: v2.4*

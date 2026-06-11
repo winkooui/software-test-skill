@@ -1,0 +1,9 @@
+case_id,module,case_name,test_type,priority,status,actual_result_detail,executor,exec_date,exec_env,bug_id,bug_severity,bug_status,exec_duration_min,retry_count,notes
+TC-AUTH-01-001-F,认证登录,正确账号密码登录成功,功能测试,P0,通过,,Ada,2026-06-10,SIT,,,,3,0,核心路径通过
+TC-AUTH-01-002-S,认证登录,错误密码不暴露账号存在性,安全测试,P0,失败,接口返回文案区分了账号不存在和密码错误,Ada,2026-06-10,SIT,BUG-101,严重,待修复,5,1,需要统一错误提示
+TC-AUTH-02-001-F,账号锁定,连续5次错误后账号锁定,功能测试,P0,通过,,Ben,2026-06-10,SIT,,,,6,0,
+TC-AUTH-02-002-R,账号锁定,锁定到期后自动解锁,回归测试,P1,阻塞,测试环境 Redis 时间模拟能力不可用,Ben,2026-06-10,SIT,,,,0,0,等待环境支持
+TC-AUTH-03-001-S,跳转恢复,拒绝非本站redirect_url,安全测试,P0,失败,外部URL被写入跳转参数,Cara,2026-06-11,UAT,BUG-102,致命,待修复,4,0,上线阻塞
+TC-AUTH-03-002-U,跳转恢复,移动端登录表单可完整操作,用户体验测试,P2,通过,,Cara,2026-06-11,UAT,,,,3,0,
+TC-AUTH-04-001-P,登录性能,登录接口P95不超过300ms,性能测试,P1,通过,P95=238ms,Devon,2026-06-11,SIT,,,,20,0,压测样本1000次
+TC-AUTH-04-002-E,异常处理,Redis故障时返回可恢复错误,功能测试,P1,跳过,,Devon,2026-06-11,SIT,,,,0,0,故障注入窗口取消
